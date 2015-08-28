@@ -63,7 +63,7 @@ def convert_mth_strings ( mth_string ):
     return mth_string
 # pull down the content from the webpage
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, 'lxml')
 # find all entries with the required class
 text_find = soup.find('p', text = re.compile('Download spend over'))
 block = text_find.find_next('ul')
@@ -71,7 +71,7 @@ links = block.find_all('li')
 
 for link in links:
     csvfiles_html = urllib2.urlopen('http://www.manchester.gov.uk' + link.a['href'])
-    sp = BeautifulSoup(csvfiles_html)
+    sp = BeautifulSoup(csvfiles_html, 'lxml')
     blocks_download = sp.find('article', 'download')
     links = blocks_download.find_all('a', href = True)
     for link in links:
