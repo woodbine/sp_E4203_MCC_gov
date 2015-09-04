@@ -13,7 +13,7 @@ from dateutil.parser import parse
 
 # Set up variables
 entity_id = "E4203_MCC_gov"
-url = "http://www.manchester.gov.uk/info/200110/budgets_and_spending/5022/publication_of_supplier_transactions_over_%C2%A3500"
+url = "http://www.manchester.gov.uk/open/downloads/download/33/expenditure_exceeding_500_2015_2016"
 errors = 0
 # Set up functions
 def validateFilename(filename):
@@ -63,50 +63,41 @@ def convert_mth_strings ( mth_string ):
     return mth_string
 # pull down the content from the webpage
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html, 'lxml')
+soup = BeautifulSoup(html)
+
 # find all entries with the required class
-text_find = soup.find('p', text = re.compile('Download spend over'))
-block = text_find.find_next('ul')
+# text_find = soup.find('p', text = re.compile('Download spend over'))
+block = soup.find('ul', 'download_list')
 links = block.find_all('li')
 
 for link in links:
-    csvfiles_html = urllib2.urlopen('http://www.manchester.gov.uk' + link.a['href'])
-    sp = BeautifulSoup(csvfiles_html, 'lxml')
-    blocks_download = sp.find('article', 'download')
-    links = blocks_download.find_all('a', href = True)
-    for link in links:
-        url = link['href']
-        if '.csv' in url:
-            date = link.text.replace('Over £500 report', ' ').strip().replace('Over £500 ', ' ').strip().replace(' over £500 report', ' ').replace(' over £500', ' ').replace('over 500 report', ' ').replace('_over_500.csv', ' ').replace('Spend_over___500___', ' ').strip().replace('Over_£500_', ' ').strip().replace('Over_500_', ' ').strip().replace('_over_£500.csv', ' ').replace('_over500.csv', ' ').replace('over500.csv', ' ').replace('.csv', ' ').replace('_v2', ' ').replace('Spendover£500', ' ').replace('over500', ' ').replace('500poundspend', ' ').replace('_500_spend_v1', ' ').replace('_V3_by_payment_date', ' ').replace('_over_£500_Spend_Report', ' ').replace('_', ' ').replace(' ', '').replace('v3', '')
-            csvMth = date[:3]
-            csvYr = date[-2:]
-            if 'er'in csvYr:
-                csvYr = '10'
-            if 'ne'in csvYr:
-                csvYr = '10'
-            csvYr = '20'+csvYr
-            csvMth = convert_mth_strings(csvMth.upper())
-            filename = entity_id + "_" + csvYr + "_" + csvMth
-            todays_date = str(datetime.now())
-            file_url = url.strip()
-            if not validateFilename(filename):
-                print filename, "*Error: Invalid filename*"
-                print file_url
-                errors += 1
-                continue
-            if not validateURL(file_url):
-                print filename, "*Error: Invalid URL*"
-                print file_url
-                errors += 1
-                continue
-            if not validateFiletype(file_url):
-                print filename, "*Error: Invalid filetype*"
-                print file_url
-                errors += 1
-                continue
-            scraperwiki.sqlite.save(unique_keys=['l'], data={"l": file_url, "f": filename, "d": todays_date })
-            print filename
+    csvfiles_html = urllib2.urlopen(link.a['href'])
+    sp = BeautifulSoup(csvfiles_html)
+    blocks_download = sp.find('div', 'download_indent')
+    url = blocks_download.find('h4').find('a')['href']
+    csvMth = blocks_download.find('h4').find('a').text.split(' ')[-2][:3]
+    csvYr = blocks_download.find('h4').find('a').text.split(' ')[-1]
+    csvMth = convert_mth_strings(csvMth.upper())
+    filename = entity_id + "_" + csvYr + "_" + csvMth
+    todays_date = str(datetime.now())
+    file_url = url.strip()
+    if not validateFilename(filename):
+        print filename, "*Error: Invalid filename*"
+        print file_url
+        errors += 1
+        continue
+    if not validateURL(file_url):
+        print filename, "*Error: Invalid URL*"
+        print file_url
+        errors += 1
+        continue
+    if not validateFiletype(file_url):
+        print filename, "*Error: Invalid filetype*"
+        print file_url
+        errors += 1
+        continue
+    scraperwiki.sqlite.save(unique_keys=['l'], data={"l": file_url, "f": filename, "d": todays_date })
+    print filename
 
 if errors > 0:
    raise Exception("%d errors occurred during scrape." % errors)
-
