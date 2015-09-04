@@ -72,7 +72,7 @@ links = block.find_all('li')
 
 for link in links:
     csvfiles_html = urllib2.urlopen(link.a['href'])
-    sp = BeautifulSoup(csvfiles_html)
+    sp = BeautifulSoup(csvfiles_html, 'lxml')
     blocks_download = sp.find('div', 'download_indent')
     url = blocks_download.find('h4').find('a')['href']
     csvMth = blocks_download.find('h4').find('a').text.split(' ')[-2][:3]
