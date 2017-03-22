@@ -86,7 +86,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E4203_MCC_gov"
-urls = ['http://www.manchester.gov.uk/open/downloads/download/33/expenditure_exceeding_500_2015_2016', 'http://www.manchester.gov.uk/open/downloads/73/archive']
+urls = ['http://www.manchester.gov.uk/open/downloads/download/33/expenditure_exceeding_500_2015_2016', 'http://www.manchester.gov.uk/open/downloads/73/archive', 'http://www.manchester.gov.uk/open/downloads/44/e']
 errors = 0
 data = []
 url = 'http://example.com'
